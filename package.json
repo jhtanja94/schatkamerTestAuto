@@ -1,0 +1,23 @@
+{
+  "name": "schatkamertestauto",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jhtanja94/schatkamerTestAuto.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/jhtanja94/schatkamerTestAuto/issues"
+  },
+  "homepage": "https://github.com/jhtanja94/schatkamerTestAuto#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.55.0",
+    "@types/node": "^24.5.2"
+  }
+}
