@@ -1,19 +1,23 @@
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, type Page } from '@playwright/test';
 
 /**
- * Extended Playwright test with automatic cookie dismissal
+ * Extended Playwright test with automatic cookie dismissal.
  * 
- * This fixture automatically dismisses the privacy cookie dialog before each test.
- * Tests that need to interact with the cookie dialog (like cookie acceptance tests)
- * should clear cookies and reload the page to see the dialog again.
+ * This fixture wraps `page.goto` so that after every navigation to a page,
+ * it will dismiss the privacy cookie dialog if it is present.
+ * 
+ * Tests that need to interact with the cookie dialog (like cookie acceptance
+ * tests) can still do so by:
+ * - clearing cookies and using `page.reload()` (which is NOT wrapped), or
+ * - importing and calling `dismissCookiesIfPresent(page)` manually.
  */
-export const test = base.extend({
-  page: async ({ page }, use) => {
-    // Automatically dismiss cookies if the dialog is present
+
+export async function dismissCookiesIfPresent(page: Page) {
     const cookieDialog = page.getByRole('dialog', { name: 'Privacy' });
     const isVisible = await cookieDialog.isVisible().catch(() => false);
     
-    if (isVisible) {
+  if (!isVisible) return;
+
       const refuse = cookieDialog.getByRole('button', { name: /Cookies weigeren|Weigeren/i });
       const accept = cookieDialog.getByRole('button', { name: /Alles accepteren|Accepteren/i });
       
@@ -25,6 +29,16 @@ export const test = base.extend({
       
       await expect(cookieDialog).toBeHidden();
     }
+
+export const test = base.extend({
+  page: async ({ page }, use) => {
+    // Wrap page.goto so every navigation auto-dismisses cookies afterwards
+    const originalGoto = page.goto.bind(page);
+    page.goto = (async (...args: Parameters<Page['goto']>) => {
+      const response = await originalGoto(...args);
+      await dismissCookiesIfPresent(page);
+      return response;
+    }) as Page['goto'];
     
     // Use the page in the test
     await use(page);
