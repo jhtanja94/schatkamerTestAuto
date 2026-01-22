@@ -12,7 +12,7 @@ import { defineConfig, devices } from '@playwright/test';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testMatch: '**/*.spec.ts', // Match all .spec.ts files in any directory
+  testDir: 'tests', // Match all .spec.ts files in any directory
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -42,13 +42,15 @@ export default defineConfig({
       //   name: 'firefox',
       //   use: { ...devices['Desktop Firefox'] },
       // },
-      // {
-      //   name: 'webkit',
-      //   use: { ...devices['Desktop Safari'] },
-      // },
-      // {
-      //   name: 'Mobile Chrome',
-      //   use: { ...devices['Pixel 5'] },
-      // },
-    ],
-});
+      {
+        name: 'webkit',
+        use: { ...devices['Desktop Safari'] },
+      },
+      
+      {
+        name: 'Mobile Chrome',
+        use: { ...devices['Pixel 5'] },
+      },
+    ]
+  }
+);

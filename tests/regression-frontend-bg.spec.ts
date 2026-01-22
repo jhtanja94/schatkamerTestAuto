@@ -30,7 +30,7 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await expect(cookieDialog).toBeHidden();
   });
 
-  test('Homepage: serie/person/omroep/program carousels navigate and items clickable', async ({ page }) => {
+  test('Homepage: serie/persoon/omroep/programma carousels navigate and items clickable', async ({ page }) => {
     // Serie carousel (Nostalgie)
     await expect(page.getByRole('heading', { name: 'Nostalgie', level: 2 })).toBeVisible();
     await page.getByRole('button', { name: 'Navigeer naar rechts' }).first().click();
@@ -59,7 +59,11 @@ test.describe('Regressie Test Set - Front end BG', () => {
   test('Homepage: program card share menu is visible', async ({ page }) => {
     // Open first share menu
     await expect(page.getByRole('heading', { name: "Demo 24-11-2025", level: 2 })).toBeVisible();
-    await page.getByRole('button', { name: 'Meer opties' }).first().click();
+    const optionsButton = page.locator(
+      'button[data-gtm-interaction-text="Meer opties"]'
+    );
+    await expect(optionsButton).toBeVisible();
+    await optionsButton.click();
     await expect(page.getByRole('menuitem', { name: 'Toevoegen aan lijst' })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Delen' })).toBeVisible();
   });
@@ -152,13 +156,15 @@ test.describe('Regressie Test Set - Front end BG', () => {
   });
 
   test('Programma detail: title, date, description visible', async ({ page }) => {
-    // Navigate to a program detail page
     await page.goto(`${BASE_URL}serie/2101608030021467131/het-klokhuis/aflevering/2101608040030110531`);
+    
     // Title
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+    
     // Date - check for date text in various formats
     await expect(page.locator('text=/\\d{1,2}-\\d{1,2}-\\d{4}|\\d{4}/').first()).toBeVisible();
-    // Description/summary
+    
+    // Description/summary - scope to main content area
     await expect(page.locator('p').first()).toBeVisible();
   });
 
@@ -201,83 +207,6 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await expect(page).toHaveURL(/omroep\/223534\/ntr($|[?&]pagina=1)/);
   });
   
-
-  // test('Videoplayer: play/pause button toggles video playback', async ({ page }) => {
-  //   await dismissCookiesIfPresent(page);
-  //   await page.goto(`${BASE_URL}serie/2101608030021467131/het-klokhuis/aflevering/2101608040030110531/geen-titel`);
-    
-  //   // Wait for and click the initial play button
-  //   const initialPlayButton = page.getByRole('button', { name: 'Video Afspelen' });
-  //   await expect(initialPlayButton).toBeVisible({ timeout: 10000 });
-  //   await initialPlayButton.click();
-    
-  //   // Wait for video to start playing
-  //   const video = page.locator('video').first();
-  //   await expect(video).toHaveJSProperty('paused', false, { timeout: 10000 });
-    
-  //   // Verify the play button changed to pause button with vjs-playing class
-  //   const pauseButton = page.locator('button.vjs-play-control.vjs-playing');
-  //   await expect(pauseButton).toBeVisible({ timeout: 5000 });
-    
-  //   // Click pause button (using force to avoid control bar interception)
-  //   await pauseButton.click({ force: true });
-    
-    
-  //   // Verify the button changed to play button with vjs-paused class
-  //   const playButton = page.locator('button.vjs-play-control.vjs-paused');
-  //   await expect(playButton).toBeVisible({ timeout: 5000 });
-    
-  //   // Click play again to verify full cycle
-  //   await playButton.click({ force: true });
-    
-  //   // Verify video is playing again
-  //   await expect(video).toHaveJSProperty('paused', false, { timeout: 10000 });
-  // });
-
-  // test('Videoplayer: initial state shows poster and play button', async ({ page }) => {
-  //   await dismissCookiesIfPresent(page);
-  //   await page.goto(`${BASE_URL}serie/2101608030021467131/het-klokhuis/aflevering/2101608040030110531/geen-titel`);
-    
-  //   // Verify the video player region is present
-  //   const videoPlayer = page.locator('[role="region"][aria-label="video player"]');
-  //   await expect(videoPlayer).toBeVisible({ timeout: 10000 });
-    
-  //   // Verify the initial play button is visible
-  //   const initialPlayButton = page.getByRole('button', { name: 'Video Afspelen' });
-  //   await expect(initialPlayButton).toBeVisible();
-    
-  //   // Verify video element exists but is not yet playing
-  //   const video = page.locator('video').first();
-  //   await expect(video).toBeVisible();
-  //   await expect(video).toHaveJSProperty('paused', true);
-  // });
-
-  // test('Videoplayer: fullscreen mode toggle', async ({ page }) => {
-  //   await dismissCookiesIfPresent(page);
-  //   await page.goto(`${BASE_URL}serie/2101608030021467131/het-klokhuis/aflevering/2101608040030110531/geen-titel`);
-    
-  //   // Start the video by clicking the initial play button
-  //   const initialPlayButton = page.getByRole('button', { name: 'Video Afspelen' });
-  //   await expect(initialPlayButton).toBeVisible({ timeout: 10000 });
-  //   await initialPlayButton.click();
-    
-  //   // Wait for video to start playing
-  //   const video = page.locator('video').first();
-  //   await expect(video).toHaveJSProperty('paused', false, { timeout: 10000 });
-    
-  //   // Locate the fullscreen button
-  //   const fullscreenButton = page.getByRole('button', { name: /Volledig scherm|Fullscreen/i });
-  //   await expect(fullscreenButton).toBeVisible({ timeout: 5000 });
-    
-  //   // Click fullscreen button (note: actual fullscreen mode can't be tested in headless)
-  //   // We're just verifying the button is clickable and present
-  //   await fullscreenButton.click({ force: true });
-    
-  //   // After clicking fullscreen, the button text might change to "Exit fullscreen"
-  //   // but in headless mode, fullscreen API might not work as expected
-  //   // So we just verify the video is still playing
-  //   await expect(video).toHaveJSProperty('paused', false);
-  // });
 
   test('Toegankelijkheid: keyboard navigation on homepage', async ({ page }) => {
     // Press Tab to focus first interactive element
