@@ -56,8 +56,7 @@ npx playwright test tests-pages --debug
 When adding tests for a new page:
 
 1. Create a new file: `[page-name].spec.ts`
-2. Import the base fixture: `import { test, expect } from '../fixtures/base'`
-3. Define the BASE_URL constant
+2. Import the base fixture and config: `import { test, expect } from '../fixtures/base'` and `import { BASE_URL } from '../config/env'`
 4. Organize tests into logical `test.describe()` blocks
 5. Use descriptive test names that explain what's being tested
 6. Follow the existing patterns for consistency
@@ -65,8 +64,7 @@ When adding tests for a new page:
 ### Example structure:
 ```typescript
 import { test, expect } from '../fixtures/base';
-
-const BASE_URL = 'https://schatkamer-tst.beeldengeluid.nl/';
+import { BASE_URL } from '../config/env';
 
 test.describe('Page Name', () => {
   test.beforeEach(async ({ page }) => {
