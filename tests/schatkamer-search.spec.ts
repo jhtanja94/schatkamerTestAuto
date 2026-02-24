@@ -169,7 +169,7 @@ await searchBox.fill('NTR');
     await expect(footer.getByRole('heading', { name: 'Omroepen' })).toBeVisible();
   
     // Expected links per section
-    const organisatieLinks = ['Over Beeld & Geluid', 'Ethische verklaring', 'AV-Convenant'];
+    const organisatieLinks = ['Over Beeld & Geluid', 'Ethische verklaring', 'Convenant Audiovisuele Werken'];
     const ondersteuningLinks = ['Veelgestelde vragen & Contact'];
     const omroepLinks = ['AVROTROS', 'VPRO'];
   

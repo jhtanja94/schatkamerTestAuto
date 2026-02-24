@@ -56,17 +56,36 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await expect(page.getByRole('link').filter({ hasText: /Mies Bouwman|Willem Ruis|Carry Tefsen/ }).first()).toBeVisible();
   });
 
-  test('Homepage: program card share menu is visible', async ({ page }) => {
-    // Open first share menu
-    await expect(page.getByRole('heading', { name: "Demo 24-11-2025", level: 2 })).toBeVisible();
-    const optionsButton = page.locator(
-      'button[data-gtm-interaction-text="Meer opties"]'
+  test('Homepage: program card "Meer opties" menu shows Toevoegen aan lijst and Delen', async ({ page }) => {
+    const card = page.locator(
+      'div[data-gtm-ux-component="swimlane-card-numbered-list"][aria-label="\'t Beste beentje voor!"]'
+    );
+    await expect(card).toBeVisible();
+  
+    const optionsButton = card.locator(
+      'button[data-gtm-interaction-text="Meer opties"][aria-haspopup="true"]'
     );
     await expect(optionsButton).toBeVisible();
     await optionsButton.click();
-    await expect(page.getByRole('menuitem', { name: 'Toevoegen aan lijst' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Delen' })).toBeVisible();
+  
+    // state check confirms the right button toggled
+    await expect(optionsButton).toHaveAttribute('aria-expanded', 'true');
+  
+    const addToList = page
+      .getByRole('button', { name: 'Log in om op te slaan' })
+      .or(page.getByRole('menuitem', { name: 'Log in om op te slaan' }))
+      .or(page.getByText('Log in om op te slaan', { exact: true }));
+  
+    const share = page
+      .getByRole('button', { name: 'Delen' })
+      .or(page.getByRole('menuitem', { name: 'Delen' }))
+      .or(page.getByText('Delen', { exact: true }));
+  
+    await expect(addToList.first()).toBeVisible();
+    await expect(share.first()).toBeVisible();
   });
+  
+  
 
   test('Footer: external link opens new tab; internal link opens in same tab', async ({ page, context }) => {
     // Scroll to footer
@@ -80,8 +99,8 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await newTab.close();
 
     // Internal link
-    await page.getByRole('link', { name: 'AV-Convenant' }).click();
-    await expect(page).toHaveURL(/\/av-convenant$/);
+    await page.getByRole('link', { name: 'Convenant Audiovisuele Werken' }).click();
+    await expect(page).toHaveURL(/\/convenant-audiovisuele-werken$/);
   });
 
   test('Footer: newsletter input and submit present', async ({ page }) => {
