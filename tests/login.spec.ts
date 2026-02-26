@@ -78,9 +78,11 @@ test.describe('Login', () => {
   });
 
   test('can navigate back from login page', async ({ page }) => {
+    // Home link is "hidden lg:block" — use desktop viewport so it's visible
+    await page.setViewportSize({ width: 1280, height: 720 });
+
     const loginPage = new LoginPage(page);
-    const backVisible = await loginPage.backLink.isVisible().catch(() => false);
-    test.skip(!backVisible, 'No back/home link found on login page');
+    await expect(loginPage.backLink).toBeVisible({ timeout: 5000 });
 
     await loginPage.backLink.click();
     await expect(page).not.toHaveURL(/\/inloggen/, { timeout: 5000 });

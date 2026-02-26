@@ -44,10 +44,12 @@ export class LoginPage extends BasePage {
   get errorLikeClass(): Locator {
     return this.page.locator('.error, [class*="error" i]').first();
   }
-
-  /** Link or button to go back (e.g. home, logo). */
+  /** Link or button to go back (e.g. home, logo). Prefer desktop home link (visible at lg). */
   get backLink(): Locator {
-    return this.page.getByRole('link', { name: /home|start|schatkamer|terug/i }).first();
+    return this.page
+      .locator('a[href="/"][data-gtm-interaction-text="Home"].lg\\:block')
+      .or(this.page.getByRole('link', { name: /home|start|schatkamer|terug/i }))
+      .first();
   }
 
   async login(email: string, password: string): Promise<void> {
