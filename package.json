@@ -3,7 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {},
+  "scripts": {
+    "test": "playwright test",
+    "test:regression": "playwright test tests/",
+    "test:pages": "playwright test tests-pages/",
+    "test:accessibility": "playwright test tests-accessibility/",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jhtanja94/schatkamerTestAuto.git"
@@ -18,6 +25,7 @@
   "homepage": "https://github.com/jhtanja94/schatkamerTestAuto#readme",
   "devDependencies": {
     "@playwright/test": "^1.55.0",
-    "@types/node": "^24.5.2"
+    "@types/node": "^24.5.2",
+    "dotenv": "^17.3.1"
   }
 }
