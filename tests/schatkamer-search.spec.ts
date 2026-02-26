@@ -1,6 +1,5 @@
 import { test, expect } from '../fixtures/base';
-
-const BASE_URL = 'https://schatkamer-tst.beeldengeluid.nl/';
+import { BASE_URL } from '../config/env';
 
 test.describe('Schatkamer Search Functionality', () => {
   test.beforeEach(async ({ page }) => {
