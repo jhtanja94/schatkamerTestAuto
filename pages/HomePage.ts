@@ -63,6 +63,22 @@ export class HomePage extends BasePage {
     return card.locator('button[data-gtm-interaction-text="Meer opties"][aria-haspopup="true"]');
   }
 
+  /** "Log in om op te slaan" in program card menu (button or menuitem). */
+  get addToListMenuItem(): Locator {
+    return this.page
+      .getByRole('button', { name: 'Log in om op te slaan' })
+      .or(this.page.getByRole('menuitem', { name: 'Log in om op te slaan' }))
+      .or(this.page.getByText('Log in om op te slaan', { exact: true }));
+  }
+
+  /** "Delen" in program card menu (button or menuitem). */
+  get shareMenuItem(): Locator {
+    return this.page
+      .getByRole('button', { name: 'Delen' })
+      .or(this.page.getByRole('menuitem', { name: 'Delen' }))
+      .or(this.page.getByText('Delen', { exact: true }));
+  }
+
   // —— Footer ——
   get footerHeadingOrganisatie(): Locator {
     return this.footer.getByRole('heading', { name: 'Organisatie' });
@@ -82,6 +98,19 @@ export class HomePage extends BasePage {
 
   get linkVeelgesteldeVragen(): Locator {
     return this.page.getByRole('link', { name: 'Veelgestelde vragen & Contact' });
+  }
+
+  get linkConvenantAudiovisueleWerken(): Locator {
+    return this.page.getByRole('link', { name: 'Convenant Audiovisuele Werken' });
+  }
+
+  get headingLeesIetsAnders(): Locator {
+    return this.page.getByRole('heading', { name: 'Lees iets anders', level: 2 });
+  }
+
+  /** First story link in "Uitgelichte Verhalen" (verhaal|Pokémon|Marvin). */
+  get storyLink(): Locator {
+    return this.page.getByRole('link').filter({ hasText: /verhaal|Pokémon|Marvin/ }).first();
   }
 
   get newsletterHeading(): Locator {

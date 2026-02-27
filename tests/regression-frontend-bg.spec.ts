@@ -1,5 +1,6 @@
 import { test, expect } from '../fixtures/base';
 import { BASE_URL } from '../config/env';
+import { HomePage, BasePage } from '../pages';
 
 test.describe('Regressie Test Set - Front end BG', () => {
   test.beforeEach(async ({ page }) => {
@@ -9,108 +10,92 @@ test.describe('Regressie Test Set - Front end BG', () => {
   test('Cookies: banner visible on first visit and can accept', async ({ page }) => {
     await page.context().clearCookies();
     await page.reload();
-    // Cookie banner should be visible
-    const cookieDialog = page.getByRole('dialog', { name: 'Privacy' });
-    await expect(cookieDialog).toBeVisible();
-    await expect(cookieDialog.getByRole('button', { name: 'Alles accepteren' })).toBeVisible();
-    await expect(cookieDialog.getByRole('button', { name: 'Cookies weigeren' })).toBeVisible();
+    const basePage = new BasePage(page);
+    await expect(basePage.cookieDialog).toBeVisible();
+    await expect(basePage.acceptCookiesButton).toBeVisible();
+    await expect(basePage.refuseCookiesButton).toBeVisible();
 
-    // Accept cookies and banner disappears
-    await cookieDialog.getByRole('button', { name: 'Alles accepteren' }).click();
-    await expect(cookieDialog).toBeHidden();
+    await basePage.acceptCookies();
+    await expect(basePage.cookieDialog).toBeHidden();
   });
 
   test('Cookies: can refuse cookies (functional banner closes)', async ({ page }) => {
     await page.context().clearCookies();
     await page.reload();
-    const cookieDialog = page.getByRole('dialog', { name: 'Privacy' });
-    await expect(cookieDialog).toBeVisible();
-    await cookieDialog.getByRole('button', { name: 'Cookies weigeren' }).click();
-    await expect(cookieDialog).toBeHidden();
+    const basePage = new BasePage(page);
+    await expect(basePage.cookieDialog).toBeVisible();
+    await basePage.refuseCookies();
+    await expect(basePage.cookieDialog).toBeHidden();
   });
 
   test('Homepage: serie/persoon/omroep/programma carousels navigate and items clickable', async ({ page }) => {
+    const homePage = new HomePage(page);
     // Serie carousel (Nostalgie)
     await expect(page.getByRole('heading', { name: 'Nostalgie', level: 2 })).toBeVisible();
-    await page.getByRole('button', { name: 'Navigeer naar rechts' }).first().click();
+    await homePage.carouselNextButtons.first().click();
     await expect(page.getByRole('link').filter({ hasText: /SESAMSTRAAT|HET KLOKHUIS|DE STRAAT/ }).first()).toBeVisible();
-    // Click one series item and verify serie detail URL pattern, then go back
     await page.getByRole('link').filter({ has: page.getByText(/SESAMSTRAAT|HET KLOKHUIS|DE STRAAT/) }).first().click();
     await expect(page).toHaveURL(/\/serie\//);
     await page.goBack();
 
     // Programma's met meerdere streams carousel
     await expect(page.getByRole('heading', { name: "Programma's met meerdere streams", level: 2 })).toBeVisible();
-    await page.getByRole('button', { name: 'Navigeer naar rechts' }).nth(1).click();
+    await homePage.carouselNextButtons.nth(1).click();
     await expect(page.getByRole('link').filter({ hasText: /Video met|Audio met|Programma met/ }).first()).toBeVisible();
 
     // Omroepen van de week carousel
     await expect(page.getByRole('heading', { name: 'Omroepen van de week', level: 2 })).toBeVisible();
-    await page.getByRole('button', { name: 'Navigeer naar rechts' }).nth(2).click();
+    await homePage.carouselNextButtons.nth(2).click();
     await expect(page.getByRole('link').filter({ hasText: /BNNVARA|AVROTROS|VPRO|EO|HUMAN|NTR/ }).first()).toBeVisible();
 
     // Personen carousel (Weet je nog?)
     await expect(page.getByRole('heading', { name: 'Weet je nog?', level: 2 })).toBeVisible();
-    await page.getByRole('button', { name: 'Navigeer naar rechts' }).nth(3).click();
+    await homePage.carouselNextButtons.nth(3).click();
     await expect(page.getByRole('link').filter({ hasText: /Mies Bouwman|Willem Ruis|Carry Tefsen/ }).first()).toBeVisible();
   });
 
   test('Homepage: program card "Meer opties" menu shows Toevoegen aan lijst and Delen', async ({ page }) => {
-    const card = page.locator(
-      'div[data-gtm-ux-component="swimlane-card-numbered-list"][aria-label="\'t Beste beentje voor!"]'
-    );
+    const homePage = new HomePage(page);
+    const card = homePage.programCard("'t Beste beentje voor!");
     await expect(card).toBeVisible();
-  
-    const optionsButton = card.locator(
-      'button[data-gtm-interaction-text="Meer opties"][aria-haspopup="true"]'
-    );
+
+    const optionsButton = homePage.cardOptionsButton(card);
     await expect(optionsButton).toBeVisible();
     await optionsButton.click();
-  
-    // state check confirms the right button toggled
+
     await expect(optionsButton).toHaveAttribute('aria-expanded', 'true');
-  
-    const addToList = page
-      .getByRole('button', { name: 'Log in om op te slaan' })
-      .or(page.getByRole('menuitem', { name: 'Log in om op te slaan' }))
-      .or(page.getByText('Log in om op te slaan', { exact: true }));
-  
-    const share = page
-      .getByRole('button', { name: 'Delen' })
-      .or(page.getByRole('menuitem', { name: 'Delen' }))
-      .or(page.getByText('Delen', { exact: true }));
-  
-    await expect(addToList.first()).toBeVisible();
-    await expect(share.first()).toBeVisible();
+
+    await expect(homePage.addToListMenuItem.first()).toBeVisible();
+    await expect(homePage.shareMenuItem.first()).toBeVisible();
   });
   
   
 
   test('Footer: external link opens new tab; internal link opens in same tab', async ({ page, context }) => {
-    // Scroll to footer
-    await page.getByRole('contentinfo').scrollIntoViewIfNeeded();
+    const homePage = new HomePage(page);
+    await homePage.scrollFooterIntoView();
 
-    // External link
     const externalPromise = context.waitForEvent('page');
-    await page.getByRole('link', { name: 'Over Beeld & Geluid' }).click();
+    await homePage.linkOverBeeldEnGeluid.click();
     const newTab = await externalPromise;
     await expect(newTab).toHaveURL(/beeldengeluid\.nl\/organisatie/);
     await newTab.close();
 
-    // Internal link
-    await page.getByRole('link', { name: 'Convenant Audiovisuele Werken' }).click();
+    await homePage.linkConvenantAudiovisueleWerken.click();
     await expect(page).toHaveURL(/\/convenant-audiovisuele-werken$/);
   });
 
   test('Footer: newsletter input and submit present', async ({ page }) => {
-    await page.getByRole('contentinfo').scrollIntoViewIfNeeded();
-    await expect(page.getByRole('heading', { name: 'Ontvang de nieuwsbrief en blijf op de hoogte' })).toBeVisible();
-    await expect(page.getByRole('contentinfo').getByRole('textbox')).toBeVisible();
-    await expect(page.getByRole('contentinfo').getByRole('button', { name: 'Aanmelden' })).toBeVisible();
+    const homePage = new HomePage(page);
+    await homePage.scrollFooterIntoView();
+    await expect(homePage.newsletterHeading).toBeVisible();
+    await expect(homePage.newsletterTextbox).toBeVisible();
+    await expect(homePage.newsletterAanmeldenButton).toBeVisible();
   });
 
   test('FAQ: expand/collapse answers by clicking a question', async ({ page }) => {
-    await page.getByRole('contentinfo').getByRole('link', { name: 'Veelgestelde vragen & Contact' }).click();
+    const homePage = new HomePage(page);
+    await homePage.linkVeelgesteldeVragen.click();
     await expect(page.getByRole('heading', { name: 'Veelgestelde vragen & Contact', level: 1 })).toBeVisible();
 
     const question = page.getByRole('button', { name: 'Wat is de Schatkamer?' });
@@ -120,27 +105,25 @@ test.describe('Regressie Test Set - Front end BG', () => {
   });
 
   test('Footer: navigate to an omroep page', async ({ page }) => {
-    await page.getByRole('contentinfo').scrollIntoViewIfNeeded();
-    // Navigate directly to test omroep page loads correctly
+    const homePage = new HomePage(page);
+    await homePage.scrollFooterIntoView();
     await page.goto(`${BASE_URL}omroep/236909/avrotros`);
     await expect(page).toHaveURL(/\/omroep\//);
     await expect(page.getByRole('heading', { name: 'AVROTROS', level: 1 })).toBeVisible();
   });
 
   test('Homepage: static components (Hero, pay-off, banner) are visible', async ({ page }) => {
-    // Hero section with heading
-    await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
-    // Banner section
-    await expect(page.getByRole('banner')).toBeVisible();
-    // Main content
-    await expect(page.getByRole('main')).toBeVisible();
+    const homePage = new HomePage(page);
+    const basePage = new BasePage(page);
+    await expect(homePage.mainHeading).toBeVisible();
+    await expect(basePage.banner).toBeVisible();
+    await expect(basePage.main).toBeVisible();
   });
 
   test('Homepage: Uitgelichte Verhalen - click on story item', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: 'Lees iets anders', level: 2 })).toBeVisible();
-    // Click first story link
-    const storyLink = page.getByRole('link').filter({ hasText: /verhaal|Pokémon|Marvin/ }).first();
-    await storyLink.click();
+    const homePage = new HomePage(page);
+    await expect(homePage.headingLeesIetsAnders).toBeVisible();
+    await homePage.storyLink.click();
     await expect(page).toHaveURL(/\/verhaal\//);
   });
 
@@ -174,36 +157,42 @@ test.describe('Regressie Test Set - Front end BG', () => {
   });
 
   test('Programma detail: title, date, description visible', async ({ page }) => {
+    const basePage = new BasePage(page);
     await page.goto(`${BASE_URL}serie/2101608030021467131/het-klokhuis/aflevering/2101608040030110531`);
-    
+
+    // Wait for main content so WebKit has finished layout
+    await expect(basePage.main).toBeVisible();
+
     // Title
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    
-    // Date - check for date text in various formats
-    await expect(page.locator('text=/\\d{1,2}-\\d{1,2}-\\d{4}|\\d{4}/').first()).toBeVisible();
-    
-    // Description/summary - scope to main content area
-    await expect(page.locator('p').first()).toBeVisible();
+    await expect(basePage.main.getByRole('heading', { level: 1 })).toBeVisible();
+
+    // Date - check for date text in various formats (within main)
+    await expect(basePage.main.locator('text=/\\d{1,2}-\\d{1,2}-\\d{4}|\\d{4}/').first()).toBeVisible();
+
+    // Description/summary - visible paragraph with text (exclude hidden video modal .vjs-offscreen)
+    await expect(
+      basePage.main.locator('p:not(.vjs-offscreen)').filter({ hasText: /\S/ }).first()
+    ).toBeVisible();
   });
 
   test('Programma detail: related items carousels visible', async ({ page }) => {
     await page.goto(`${BASE_URL}serie/2101608030021467131/het-klokhuis/aflevering/2101608040030110531/geen-titel`);
-    // Check for any related content section or heading
-    await expect(page.getByRole('main')).toBeVisible();
+    const basePage = new BasePage(page);
+    await expect(basePage.main).toBeVisible();
   });
 
   test('Pagination works on omroep page', async ({ page }) => {
+    const basePage = new BasePage(page);
     const url = `${BASE_URL}omroep/223534/ntr`;
     await page.goto(url);
-  
-    // Assert we're on the page
+
     await expect(page.getByRole('heading', { name: /NTR/i, level: 1 })).toBeVisible();
-  
+
     const pagination = page.getByRole('navigation', { name: /Paginering|Pagination/i });
     await expect(pagination).toBeVisible();
-  
+
     const firstResult = () =>
-      page.getByRole('main').getByRole('link').first().textContent();
+      basePage.main.getByRole('link').first().textContent();
   
     const firstBefore = await firstResult();
   
