@@ -63,12 +63,20 @@ export class HomePage extends BasePage {
     return card.locator('button[data-gtm-interaction-text="Meer opties"][aria-haspopup="true"]');
   }
 
-  /** "Log in om op te slaan" in program card menu (button or menuitem). */
+  /** "Log in om op te slaan" in program card menu when not logged in (button or menuitem). */
   get addToListMenuItem(): Locator {
     return this.page
       .getByRole('button', { name: 'Log in om op te slaan' })
       .or(this.page.getByRole('menuitem', { name: 'Log in om op te slaan' }))
       .or(this.page.getByText('Log in om op te slaan', { exact: true }));
+  }
+
+  /** "Toevoegen aan lijst" in program card menu when logged in (button or menuitem). */
+  get addToListMenuItemLoggedIn(): Locator {
+    return this.page
+      .getByRole('button', { name: /Toevoegen aan lijst|toevoegen aan lijst/i })
+      .or(this.page.getByRole('menuitem', { name: /Toevoegen aan lijst|toevoegen aan lijst/i }))
+      .or(this.page.getByText(/Toevoegen aan lijst|toevoegen aan lijst/i));
   }
 
   /** "Delen" in program card menu (button or menuitem). */

@@ -8,6 +8,7 @@ Page objects encapsulate selectors and actions for specific pages or flows. Use 
 - **HomePage** – Homepage: `searchBox`, `zoekenButton`, `mainHeading`, `contentLinksWithImage`, carousel buttons, program card “Meer opties”, footer sections and links, `search()`, `searchAndSubmit()`, `openFirstProgramCardOptions()`.
 - **SearchPage** – Search flyout and `/zoeken` results: `flyoutMediaHeading`, `flyoutMediaItems`, `flyoutOmroepLinks`, `resultsHeading`, `sortTrigger`, `playableSwitch`, `pagination`, `filterButton(name)`.
 - **LoginPage** – `/inloggen`: `emailField`, `passwordField`, `submitButton`, `login(email, password)`, `gotoLogin()`.
+- **AccountPage** – Account (when logged in): `accountHeading`, `accountLink`, `tabLijsten`, `passwordSection`, `editPasswordTrigger`, `yearOfBirthSection`, `editYearOfBirthTrigger`, `lijstenHeading`, `createListButton`, `gotoAccount()`, `gotoMijnAccount()`.
 
 ## Usage
 
