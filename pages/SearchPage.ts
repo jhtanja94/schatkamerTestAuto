@@ -54,12 +54,25 @@ export class SearchPage extends BasePage {
     return this.page.getByRole('button', { name: /Oudste eerst|Nieuwste eerst|Relevantie/ });
   }
 
+  /** Panel that opens when the sort button is clicked (aria-controls="sort"). Use for scoped option click. */
+  get sortDropdownPanel(): Locator {
+    return this.page.locator('#sort');
+  }
+
   get sortOptionOudsteEerst(): Locator {
     return this.page.getByText('Oudste eerst');
   }
 
   get sortOptionNieuwsteEerst(): Locator {
     return this.page.getByText('Nieuwste eerst');
+  }
+
+  /** "Nieuwste eerst" option scoped to the open sort dropdown (avoids matching text elsewhere on page). */
+  get sortOptionNieuwsteEerstInDropdown(): Locator {
+    return this.sortDropdownPanel
+      .getByRole('option', { name: /Nieuwste eerst/i })
+      .or(this.sortDropdownPanel.getByText('Nieuwste eerst', { exact: true }))
+      .first();
   }
 
   get playableSwitch(): Locator {

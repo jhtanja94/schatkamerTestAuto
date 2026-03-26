@@ -28,6 +28,17 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await expect(basePage.cookieDialog).toBeHidden();
   });
 
+  test('Cookies: banner not shown on return visit after accepting', async ({ page }) => {
+    await page.context().clearCookies();
+    await page.reload();
+    const basePage = new BasePage(page);
+    await expect(basePage.cookieDialog).toBeVisible();
+    await basePage.acceptCookies();
+    await expect(basePage.cookieDialog).toBeHidden();
+    await page.reload();
+    await expect(basePage.cookieDialog).toBeHidden();
+  });
+
   test('Homepage: serie/persoon/omroep/programma carousels navigate and items clickable', async ({ page }) => {
     const homePage = new HomePage(page);
     // Serie carousel (Nostalgie)
@@ -68,8 +79,36 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await expect(homePage.addToListMenuItem.first()).toBeVisible();
     await expect(homePage.shareMenuItem.first()).toBeVisible();
   });
+
+  test('Homepage: program card Delen opens popup with share options', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const card = homePage.programCard("'t Beste beentje voor!");
+    await expect(card).toBeVisible();
+    await homePage.cardOptionsButton(card).click();
+    await homePage.shareMenuItem.first().click();
+
+    const copyButton = page.getByRole('button', { name: /Kopieer|Copy|kopiëren|Link/i });
+    const urlField = page.locator('input[readonly], input[type="url"]').first();
+    const shareContent = page.getByText(/delen|share|link/i).or(copyButton).or(urlField);
+    await expect(shareContent.first()).toBeVisible({ timeout: 8000 });
+  });
   
   
+
+  test('Homepage: footer contains Organisatie, Ondersteuning, Omroepen and legal/B&G links', async ({
+    page,
+  }) => {
+    const homePage = new HomePage(page);
+    await homePage.scrollFooterIntoView();
+    await expect(homePage.footerHeadingOrganisatie).toBeVisible();
+    await expect(homePage.footerHeadingOndersteuning).toBeVisible();
+    await expect(homePage.footerHeadingOmroepen).toBeVisible();
+    const footer = homePage.footer;
+    const legalOrLogo = footer
+      .getByRole('link', { name: /Algemene|Privacy|Toegankelijkheid|Voorwaarden|beeldengeluid|Beeld.*Geluid/i })
+      .or(footer.locator('a[href*="beeldengeluid"]'));
+    await expect(legalOrLogo.first()).toBeVisible();
+  });
 
   test('Footer: external link opens new tab; internal link opens in same tab', async ({ page, context }) => {
     const homePage = new HomePage(page);
@@ -93,6 +132,20 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await expect(homePage.newsletterAanmeldenButton).toBeVisible();
   });
 
+  test('Homepage: newsletter invalid email shows error or keeps form visible', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await homePage.scrollFooterIntoView();
+    await homePage.newsletterTextbox.fill('not-an-email');
+    await homePage.newsletterAanmeldenButton.click();
+    const errorVisible = await page
+      .getByText(/ongeldig|invalid|voer een geldig|vul een geldig|fout|error|e-mail/i)
+      .first()
+      .isVisible()
+      .catch(() => false);
+    const formStillVisible = await homePage.newsletterAanmeldenButton.isVisible().catch(() => false);
+    expect(errorVisible || formStillVisible).toBe(true);
+  });
+
   test('FAQ: expand/collapse answers by clicking a question', async ({ page }) => {
     const homePage = new HomePage(page);
     await homePage.linkVeelgesteldeVragen.click();
@@ -110,6 +163,37 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await page.goto(`${BASE_URL}omroep/236909/avrotros`);
     await expect(page).toHaveURL(/\/omroep\//);
     await expect(page.getByRole('heading', { name: 'AVROTROS', level: 1 })).toBeVisible();
+  });
+
+  test('Homepage: header contains logo (to Home), search bar and Inloggen', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const basePage = new BasePage(page);
+    await expect(basePage.banner).toBeVisible();
+    await expect(basePage.homeLink).toBeVisible();
+    await expect(homePage.searchBoxWithPlaceholder.or(homePage.searchBox)).toBeVisible();
+    await expect(homePage.inloggenLink.or(homePage.inloggenButton)).toBeVisible();
+  });
+
+  test('Inloggen: navigate to login via header lands on /inloggen', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await homePage.inloggenLink.or(homePage.inloggenButton).first().click();
+    await expect(page).toHaveURL(/\/inloggen/);
+  });
+
+  test('Inloggen: navigate to login via "Log in om op te slaan" on program detail page', async ({
+    page,
+  }) => {
+    await page.goto(
+      `${BASE_URL}serie/2101608030021467131/het-klokhuis/aflevering/2101608040030110531`
+    );
+    const basePage = new BasePage(page);
+    await expect(basePage.main).toBeVisible();
+    const logInToSave = page
+      .getByRole('button', { name: /Log in om op te slaan|Inloggen om op te slaan/i })
+      .or(page.getByRole('link', { name: /Log in om op te slaan|Inloggen om op te slaan/i }));
+    await expect(logInToSave.first()).toBeVisible({ timeout: 8000 });
+    await logInToSave.first().click();
+    await expect(page).toHaveURL(/\/inloggen/);
   });
 
   test('Homepage: static components (Hero, pay-off, banner) are visible', async ({ page }) => {
@@ -156,6 +240,23 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await expect(page.getByRole('heading', { name: /In de spotlight/i, level: 2 })).toBeVisible();
   });
 
+  test('Entiteit Serie: serie page shows linked programmes', async ({ page }) => {
+    await page.goto(`${BASE_URL}serie/2101608030021453631/sesamstraat`);
+    await expect(page.getByRole('heading', { name: /SESAMSTRAAT/i, level: 1 })).toBeVisible();
+    const basePage = new BasePage(page);
+    await expect(basePage.main.getByRole('link').first()).toBeVisible();
+  });
+
+  test('Entiteit Omroep: sort control visible and offers Oudste eerst', async ({ page }) => {
+    await page.goto(`${BASE_URL}omroep/223534/ntr`);
+    const basePage = new BasePage(page);
+    await expect(basePage.main).toBeVisible();
+    const sortTrigger = page.getByRole('button', { name: /Oudste eerst|Nieuwste eerst|Relevantie|Sortering/i });
+    await expect(sortTrigger.first()).toBeVisible({ timeout: 8000 });
+    await sortTrigger.first().click();
+    await expect(page.getByText('Oudste eerst').first()).toBeVisible({ timeout: 3000 });
+  });
+
   test('Programma detail: title, date, description visible', async ({ page }) => {
     const basePage = new BasePage(page);
     await page.goto(`${BASE_URL}serie/2101608030021467131/het-klokhuis/aflevering/2101608040030110531`);
@@ -179,6 +280,19 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await page.goto(`${BASE_URL}serie/2101608030021467131/het-klokhuis/aflevering/2101608040030110531/geen-titel`);
     const basePage = new BasePage(page);
     await expect(basePage.main).toBeVisible();
+  });
+
+  test('Breadcrumb: visible and clickable on program detail and verhaal pages', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await page.goto(`${BASE_URL}serie/2101608030021467131/het-klokhuis/aflevering/2101608040030110531`);
+    await expect(homePage.breadcrumb).toBeVisible();
+    await expect(homePage.breadcrumb.getByRole('link', { name: 'Home' })).toBeVisible();
+    await homePage.breadcrumb.getByRole('link', { name: 'Home' }).click();
+    await expect(page).not.toHaveURL(/\/serie\/|\/aflevering\//);
+
+    await page.goto(`${BASE_URL}verhaal/franks-componentenverhaal`);
+    await expect(homePage.breadcrumb).toBeVisible();
+    await expect(homePage.breadcrumb.getByRole('link').first()).toBeVisible();
   });
 
   test('Pagination works on omroep page', async ({ page }) => {

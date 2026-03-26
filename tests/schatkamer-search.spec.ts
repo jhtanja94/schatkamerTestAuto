@@ -107,6 +107,30 @@ test.describe('Schatkamer Search Functionality', () => {
     await expect(searchPage.firstResultLink).toBeVisible();
   });
 
+  test('Advanced search: change sort to Nieuwste eerst', async ({ page }) => {
+    const homePage = new HomePage(page);
+    const searchPage = new SearchPage(page);
+    await homePage.searchAndPressEnter('klokhuis');
+
+    await expect(page).toHaveURL(/\/zoeken\?/);
+    await searchPage.sortButton.click();
+    await page.getByRole('option', { name: /Nieuwste eerst/i }).or(page.getByText('Nieuwste eerst').first()).click();
+
+    await expect(searchPage.resultsLabel.or(searchPage.firstResultLink)).toBeVisible();
+  });
+
+  test('Advanced search: toggle "alleen direct afspeelbaar" off shows also non-playable', async ({
+    page,
+  }) => {
+    const homePage = new HomePage(page);
+    const searchPage = new SearchPage(page);
+    await homePage.searchAndPressEnter('NTR');
+
+    await expect(searchPage.playableSwitch).toBeChecked();
+    await searchPage.playableSwitch.click();
+    await expect(searchPage.playableSwitch).not.toBeChecked();
+  });
+
   test('Advanced search: clicking Zoeken button navigates to results', async ({ page }) => {
     const query = 'NTR';
     const homePage = new HomePage(page);

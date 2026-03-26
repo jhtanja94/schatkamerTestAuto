@@ -51,11 +51,16 @@ export class HomePage extends BasePage {
     return this.main.locator('button[data-gtm-interaction-text="Meer opties"]').first();
   }
 
-  /** Program card by swimlane aria-label (e.g. "'t Beste beentje voor!"). */
-  programCard(ariaLabel: string): Locator {
-    return this.page.locator(
-      `div[data-gtm-ux-component="swimlane-card-numbered-list"][aria-label="${ariaLabel}"]`
-    );
+  /** Program card by program title (e.g. "'t Beste beentje voor!").
+   * Finds the card that contains a link whose name includes the given title.
+   * (Swimlane sections use their own aria-label like "Het Lichaam", not the program title.) */
+  programCard(programTitle: string): Locator {
+    const escaped = programTitle.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const linkWithTitle = this.page.getByRole('link', { name: new RegExp(escaped) });
+    return this.page
+      .locator('div[data-gtm-ux-component="swimlane-card-numbered-list"]')
+      .filter({ has: linkWithTitle })
+      .first();
   }
 
   /** "Meer opties" button inside a specific card. */
