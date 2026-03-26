@@ -29,6 +29,16 @@ test.describe('Logged-in user', () => {
     await expect(accountPage.yearOfBirthSection).toBeVisible({ timeout: 5000 });
   });
 
+  test('Inloggen: logout succeeds', async ({ page }) => {
+    const logoutButton = page
+      .getByRole('button', { name: /Uitloggen|Log uit/i })
+      .or(page.getByRole('link', { name: /Uitloggen|Log uit/i }))
+      .first();
+    await expect(logoutButton).toBeVisible({ timeout: 5000 });
+    await logoutButton.click();
+    await expect(page).toHaveURL(/\/inloggen|\/$/, { timeout: 10000 });
+  });
+
   test('Account page: Lijsten tab is present and can be opened', async ({ page }) => {
     const accountPage = new AccountPage(page);
     await goToAccountPage(page, accountPage);
