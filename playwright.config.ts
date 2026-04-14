@@ -5,6 +5,7 @@ import { BASE_URL } from './config/env';
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  globalSetup: './global-setup.ts',
   testDir: '.',
   testMatch: [
     'tests/**/*.spec.ts',

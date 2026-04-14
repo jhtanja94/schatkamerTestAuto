@@ -1,6 +1,6 @@
 import { test, expect } from '../fixtures/base';
 import { BASE_URL } from '../config/env';
-import { HomePage, LoginPage, AccountPage } from '../pages';
+import { HomePage, AccountPage } from '../pages';
 import { goToAccountPage, randomValidBirthYear, tooYoungBirthYear } from '../helpers/logged-in';
 
 const username = process.env.LOGIN_USERNAME;
@@ -8,13 +8,13 @@ const password = process.env.LOGIN_PASSWORD;
 const hasCredentials = Boolean(username && password);
 
 test.describe('Logged-in user', () => {
+  // Reuse the auth state saved by global-setup.ts — avoids a full login on every test.
+  // If credentials are not set, global-setup writes an empty auth.json and the tests skip below.
+  test.use({ storageState: 'auth.json' });
+
   test.beforeEach(async ({ page }) => {
     test.skip(!hasCredentials, 'Set LOGIN_USERNAME and LOGIN_PASSWORD in .env to run logged-in tests');
     await page.goto(BASE_URL);
-    const loginPage = new LoginPage(page);
-    await loginPage.gotoLogin();
-    await loginPage.login(username!, password!);
-    await expect(page).not.toHaveURL(/\/inloggen/, { timeout: 15000 });
   });
 
   test('Account page: can open account and see password and year of birth', async ({ page }) => {
