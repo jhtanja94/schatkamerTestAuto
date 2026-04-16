@@ -55,7 +55,7 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await expect(page.getByRole('link').filter({ hasText: /Video met|Audio met|Programma met/ }).first()).toBeVisible();
 
     // Omroepen van de week carousel
-    await expect(page.getByRole('heading', { name: 'Omroepen van de week', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Omroepies', level: 2 })).toBeVisible();
     await homePage.carouselNextButtons.nth(2).click();
     await expect(page.getByRole('link').filter({ hasText: /BNNVARA|AVROTROS|VPRO|EO|HUMAN|NTR/ }).first()).toBeVisible();
 
@@ -206,8 +206,10 @@ test.describe('Regressie Test Set - Front end BG', () => {
 
   test('Homepage: Uitgelichte Verhalen - click on story item', async ({ page }) => {
     const homePage = new HomePage(page);
-    await expect(homePage.headingLeesIetsAnders).toBeVisible();
-    await homePage.storyLink.click();
+    const story = homePage.storyLink;
+    await expect(story).toBeVisible();
+    await story.scrollIntoViewIfNeeded();
+    await story.click();
     await expect(page).toHaveURL(/\/verhaal\//);
   });
 
@@ -254,7 +256,8 @@ test.describe('Regressie Test Set - Front end BG', () => {
     const sortTrigger = page.getByRole('button', { name: /Oudste eerst|Nieuwste eerst|Relevantie|Sortering/i });
     await expect(sortTrigger.first()).toBeVisible({ timeout: 8000 });
     await sortTrigger.first().click();
-    await expect(page.getByText('Oudste eerst').first()).toBeVisible({ timeout: 3000 });
+    // Sort UI is a radiogroup in menu "Sorteren"; getByText hits a hidden <p> clone first.
+    await expect(page.getByRole('radio', { name: /^Oudste eerst$/i })).toBeVisible({ timeout: 5000 });
   });
 
   test('Programma detail: title, date, description visible', async ({ page }) => {

@@ -117,13 +117,14 @@ export class HomePage extends BasePage {
     return this.page.getByRole('link', { name: 'Convenant Audiovisuele Werken' });
   }
 
+  /** Legacy title; CMS may use another heading for the same swimlane. */
   get headingLeesIetsAnders(): Locator {
     return this.page.getByRole('heading', { name: 'Lees iets anders', level: 2 });
   }
 
-  /** First story link in "Uitgelichte Verhalen" (verhaal|Pokémon|Marvin). */
+  /** First in-main link to a story detail page (featured swimlane or hero). */
   get storyLink(): Locator {
-    return this.page.getByRole('link').filter({ hasText: /verhaal|Pokémon|Marvin/ }).first();
+    return this.main.locator('a[href*="/verhaal/"]').first();
   }
 
   get newsletterHeading(): Locator {
