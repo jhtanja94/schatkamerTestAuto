@@ -171,4 +171,31 @@ test.describe('Schatkamer Search Functionality', () => {
     await expect(homePage.mainHeading).toBeVisible();
   });
 
+  test('should display footer information correctly', async ({ page }) => {
+    const homePage = new HomePage(page);
+    await homePage.scrollFooterIntoView();
+
+    await expect(homePage.footerHeadingOrganisatie).toBeVisible();
+    await expect(homePage.footerHeadingOndersteuning).toBeVisible();
+    await expect(homePage.footerHeadingOmroepen).toBeVisible();
+
+    const organisatieLinks = ['Over Beeld & Geluid', 'Ethische verklaring', 'Convenant Audiovisuele Werken'];
+    const ondersteuningLinks = ['Veelgestelde vragen & Contact'];
+    const omroepLinks = ['AVROTROS', 'VPRO'];
+
+    for (const name of organisatieLinks) {
+      await expect(homePage.footer.getByRole('link', { name })).toBeVisible();
+    }
+
+    for (const name of ondersteuningLinks) {
+      await expect(homePage.footer.getByRole('link', { name })).toBeVisible();
+    }
+
+    for (const name of omroepLinks) {
+      await expect(homePage.footer.getByRole('link', { name })).toBeVisible();
+    }
+
+    await expect(homePage.newsletterHeading).toBeVisible();
+    await expect(homePage.newsletterAanmeldenButton).toBeVisible();
+  });
 });
