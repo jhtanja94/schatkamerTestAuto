@@ -30,9 +30,11 @@ test.describe('Logged-in user', () => {
   });
 
   test('Inloggen: logout succeeds', async ({ page }) => {
+    // Logout button is on the account settings page
+    await page.goto(`${BASE_URL}account`);
     const logoutButton = page
-      .getByRole('button', { name: /Uitloggen|Log uit/i })
-      .or(page.getByRole('link', { name: /Uitloggen|Log uit/i }))
+      .getByRole('button', { name: /Uitloggen|Log uit|uit te loggen/i })
+      .or(page.getByRole('link', { name: /Uitloggen|Log uit|uit te loggen/i }))
       .first();
     await expect(logoutButton).toBeVisible({ timeout: 5000 });
     await logoutButton.click();

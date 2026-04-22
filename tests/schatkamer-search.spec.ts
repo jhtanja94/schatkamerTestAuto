@@ -116,7 +116,7 @@ test.describe('Schatkamer Search Functionality', () => {
     await searchPage.sortButton.click();
     await page.getByRole('option', { name: /Nieuwste eerst/i }).or(page.getByText('Nieuwste eerst').first()).click();
 
-    await expect(searchPage.resultsLabel.or(searchPage.firstResultLink)).toBeVisible();
+    await expect(searchPage.firstResultLink).toBeVisible();
   });
 
   test('Advanced search: toggle "alleen direct afspeelbaar" off shows also non-playable', async ({

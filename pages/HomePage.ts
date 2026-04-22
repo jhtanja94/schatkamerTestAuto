@@ -11,12 +11,12 @@ export class HomePage extends BasePage {
 
   // —— Search (header) ——
   get searchBox(): Locator {
-    return this.page.getByRole('textbox', { name: /Zoek/ });
+    return this.page.getByRole('combobox', { name: /Zoek/ });
   }
 
   get searchBoxWithPlaceholder(): Locator {
     return this.page
-      .getByRole('textbox', { name: /Zoek op programma's, personen, verhalen en omroepen/ })
+      .getByRole('combobox', { name: /Zoek op programma's, personen, verhalen en omroepen/ })
       .first();
   }
 
@@ -65,7 +65,7 @@ export class HomePage extends BasePage {
 
   /** "Meer opties" button inside a specific card. */
   cardOptionsButton(card: Locator): Locator {
-    return card.locator('button[data-gtm-interaction-text="Meer opties"][aria-haspopup="true"]');
+    return card.locator('button[data-gtm-interaction-text*="Meer opties"]');
   }
 
   /** "Log in om op te slaan" in program card menu when not logged in (button or menuitem). */

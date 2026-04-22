@@ -13,22 +13,30 @@ import { test as base, expect, type Page } from '@playwright/test';
  */
 
 export async function dismissCookiesIfPresent(page: Page) {
-    const cookieDialog = page.getByRole('dialog', { name: 'Privacy' });
-    const isVisible = await cookieDialog.isVisible().catch(() => false);
-    
-  if (!isVisible) return;
+  // Skip if consent was already given in this browser context
+  const cookies = await page.context().cookies().catch(() => []);
+  const hasConsent = cookies.some(c => c.name === 'OptanonAlertBoxClosed');
+  if (hasConsent) return;
 
-      const refuse = cookieDialog.getByRole('button', { name: /Cookies weigeren|Weigeren/i });
-      const accept = cookieDialog.getByRole('button', { name: /Alles accepteren|Accepteren/i });
-      
-      if (await refuse.isVisible().catch(() => false)) {
-        await refuse.click();
-      } else if (await accept.isVisible().catch(() => false)) {
-        await accept.click();
-      }
-      
-      await expect(cookieDialog).toBeHidden();
-    }
+  const cookieDialog = page.getByRole('dialog', { name: 'Privacy' });
+  try {
+    // OneTrust injects the dialog asynchronously; wait for it to appear
+    await cookieDialog.waitFor({ state: 'visible', timeout: 3000 });
+  } catch {
+    return;
+  }
+
+  const refuse = cookieDialog.getByRole('button', { name: /Cookies weigeren|Weigeren/i });
+  const accept = cookieDialog.getByRole('button', { name: /Alles accepteren|Accepteren/i });
+
+  if (await refuse.isVisible().catch(() => false)) {
+    await refuse.click();
+  } else if (await accept.isVisible().catch(() => false)) {
+    await accept.click();
+  }
+
+  await expect(cookieDialog).toBeHidden({ timeout: 5000 });
+}
 
 export const test = base.extend({
   page: async ({ page }, use) => {

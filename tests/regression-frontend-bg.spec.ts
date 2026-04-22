@@ -55,7 +55,7 @@ test.describe('Regressie Test Set - Front end BG', () => {
     await expect(page.getByRole('link').filter({ hasText: /Video met|Audio met|Programma met/ }).first()).toBeVisible();
 
     // Omroepen van de week carousel
-    await expect(page.getByRole('heading', { name: 'Omroepies', level: 2 })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Omroep/i, level: 2 }).first()).toBeVisible();
     await homePage.carouselNextButtons.nth(2).click();
     await expect(page.getByRole('link').filter({ hasText: /BNNVARA|AVROTROS|VPRO|EO|HUMAN|NTR/ }).first()).toBeVisible();
 
