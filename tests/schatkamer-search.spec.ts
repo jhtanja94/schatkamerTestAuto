@@ -47,7 +47,7 @@ test.describe('Schatkamer Search Functionality', () => {
       { timeout: 8000 }
     ).catch(() => null);
 
-    await searchBox.pressSequentially('NTR', { delay: 60 });
+    await searchBox.pressSequentially('NTR', { delay: 10 });
     await searchResponse;
 
     // Single assertion: Media section has 5 links (retries until timeout)
@@ -61,7 +61,7 @@ test.describe('Schatkamer Search Functionality', () => {
     const searchPage = new SearchPage(page);
     const searchBox = homePage.searchBoxWithPlaceholder;
     await searchBox.click();
-    await searchBox.pressSequentially('NTR', { delay: 80 });
+    await searchBox.pressSequentially('NTR', { delay: 10 });
 
     await expect(searchPage.flyoutMediaHeading).toBeVisible({ timeout: 5000 });
     await expect(searchPage.flyoutOmroepLinks).toHaveCount(2);
